@@ -1,6 +1,10 @@
+import 'package:flash_chat/constants.dart';
+import 'package:flash_chat/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flash_chat/components/rounded_button.dart';
 
 class LoginScreen extends StatefulWidget {
+  static const String id = 'login_screen';
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
@@ -18,79 +22,41 @@ class _LoginScreenState extends State<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              child: Image.asset('images/logo.png'),
-              height: 200,
+            Hero(
+              tag: 'logo',
+              child: Container(
+                child: Image.asset('images/logo.png'),
+                height: 200,
+              ),
             ),
             const SizedBox(
               height: 48,
             ),
             TextField(
-              onChanged: (value) {},
-              decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32),
-                      borderSide: const BorderSide(
-                          color: Colors.lightBlueAccent, width: 1)),
-                  focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32),
-                      borderSide: const BorderSide(
-                          color: Colors.lightBlueAccent, width: 1)),
-                  hintText: 'Enter email id',
-                  hintStyle: const TextStyle(
-                    color: Colors.grey,
-                  ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10)),
-            ),
+                keyboardType: TextInputType.emailAddress,
+                textAlign: TextAlign.center,
+                onChanged: (value) {},
+                decoration: kLoginInputDecoration.copyWith(
+                    hintText: 'Enter your Email')),
             const SizedBox(
               height: 8,
             ),
             TextField(
-              onChanged: (value) {},
-              decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32),
-                      borderSide: const BorderSide(
-                          color: Colors.lightBlueAccent, width: 1)),
-                  focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(32),
-                      borderSide: const BorderSide(
-                          color: Colors.lightBlueAccent, width: 1)),
-                  hintText: 'Enter Password',
-                  hintStyle: const TextStyle(
-                    color: Colors.grey,
-                  ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10)),
-            ),
+                obscureText: true,
+                textAlign: TextAlign.center,
+                onChanged: (value) {},
+                decoration:
+                    kLoginInputDecoration.copyWith(hintText: 'Enter Password')),
             const SizedBox(
               height: 24,
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Material(
-                elevation: 5,
-                color: Colors.lightBlueAccent,
-                borderRadius: BorderRadius.circular(30),
-                child: MaterialButton(
-                  onPressed: () {},
-                  minWidth: 200,
-                  height: 42,
-                  child: Text('Log In'),
-                ),
-              ),
-            ),
+            RoundedButton(
+              colour: Colors.lightBlueAccent,
+              onPress: () {
+                Navigator.pushNamed(context, ChatScreen.id);
+              },
+              title: 'Log In',
+            )
           ],
         ),
       ),

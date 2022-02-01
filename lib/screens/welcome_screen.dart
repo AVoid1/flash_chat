@@ -1,19 +1,41 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import 'registration_screen.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:flash_chat/components/rounded_button.dart';
 
 class WelcomeScreen extends StatefulWidget {
+  static const String id = 'welcome_screen';
+
   const WelcomeScreen({Key? key}) : super(key: key);
 
   @override
   _WelcomeScreenState createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> {
+class _WelcomeScreenState extends State<WelcomeScreen>
+    with SingleTickerProviderStateMixin {
+  AnimationController? controller;
+  Animation? animation;
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {});
+    controller =
+        AnimationController(duration: const Duration(seconds: 1), vsync: this);
+    animation =
+        ColorTween(begin: Colors.grey, end: Colors.white).animate(controller!);
+    controller!.forward();
+    controller!.addListener(() {
+      setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: animation!.value,
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24),
         child: Column(
@@ -22,13 +44,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           children: [
             Row(
               children: [
-                Container(
-                  child: Image.asset('images/logo.png'),
-                  height: 60,
+                Hero(
+                  tag: 'logo',
+                  child: Container(
+                    child: Image.asset('images/logo.png'),
+                    height: 60,
+                  ),
                 ),
-                const Text(
-                  'Flash Chat',
-                  style: TextStyle(
+                TypewriterAnimatedTextKit(
+                  text: ['Flash Chat'],
+                  speed: Duration(milliseconds: 120),
+                  textStyle: const TextStyle(
                       fontSize: 45,
                       fontWeight: FontWeight.w900,
                       color: Colors.black),
@@ -38,43 +64,19 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             const SizedBox(
               height: 48,
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Material(
-                elevation: 5,
-                color: Colors.lightBlueAccent,
-                borderRadius: BorderRadius.circular(30),
-                child: MaterialButton(
-                  onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) {
-                      return LoginScreen();
-                    }));
-                  },
-                  minWidth: 200,
-                  height: 42,
-                  child: Text('Log In'),
-                ),
-              ),
+            RoundedButton(
+              colour: Colors.lightBlueAccent,
+              onPress: () {
+                Navigator.pushNamed(context, LoginScreen.id);
+              },
+              title: 'Log In',
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Material(
-                elevation: 5,
-                color: Colors.blueAccent,
-                borderRadius: BorderRadius.circular(30),
-                child: MaterialButton(
-                  onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) {
-                      return RegistrationScreen();
-                    }));
-                  },
-                  minWidth: 200,
-                  height: 42,
-                  child: Text('Register'),
-                ),
-              ),
+            RoundedButton(
+              colour: Colors.blueAccent,
+              onPress: () {
+                Navigator.pushNamed(context, RegistrationScreen.id);
+              },
+              title: 'Register',
             )
           ],
         ),
