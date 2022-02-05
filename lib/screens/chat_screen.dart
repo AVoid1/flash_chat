@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flash_chat/constants.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatScreen extends StatefulWidget {
   static const String id = 'chat_screen';
@@ -11,13 +10,35 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final messageController = TextEditingController();
+  final CollectionReference _collectionRef =
+      FirebaseFirestore.instance.collection('messages');
   final _auth = FirebaseAuth.instance;
   User? loggedInUser;
+  late String messageText;
+
+  // void messagesStream() async {
+  //   await for (var snapshot in _collectionRef.snapshots()) {
+  //     for (var message in snapshot.docs) {
+  //       print(message.data);
+  //     }
+  //   }
+  // }
 
   @override
   void initState() {
     super.initState();
     getCurrentUser();
+  }
+
+  void onSendMessage() async {
+    if (messageText.isNotEmpty) {
+      messageController.clear();
+      await _collectionRef
+          .add({'sender': loggedInUser!.email, 'text': messageText});
+    } else {
+      print('Enter Some Text');
+    }
   }
 
   void getCurrentUser() async {
@@ -32,6 +53,11 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  // void getMessages() async {
+  //   final messages = await _firestore.collection('messages').get();
+  //   for(var message in messages.docs)
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,7 +67,8 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
               icon: Icon(Icons.close),
               onPressed: () {
-                //Implement logout functionality
+                _auth.signOut();
+                Navigator.pop(context);
               }),
         ],
         title: Text('⚡️Chat'),
@@ -52,6 +79,50 @@ class _ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
+            StreamBuilder(
+              stream: _collectionRef.snapshots(),
+              builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasData) {
+                  return Expanded(
+                    child: SizedBox(
+                      height: 20,
+                      child: ListView.builder(
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          return Card(
+                            child: ListTile(
+                              title: Text((snapshot.data!.docs[index].data()
+                                      as Map)['text']
+                                  .toString()),
+                              subtitle: Text((snapshot.data!.docs[index].data()
+                                      as Map)['sender']
+                                  .toString()),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
+              },
+            ),
+            // StreamBuilder<QuerySnapshot>(
+            //   stream: _collectionRef.snapshots(),
+            //   builder: (context, snapshot) {
+            //     if (snapshot.hasData) {
+            //       final messages = snapshot.data!.docs;
+            //       List<Text> messageWidgets = [];
+
+            //       for (var message in messages) {
+            //         final messageText = message.data()['text'];
+            //         final messageSender = message.data();
+            //       }
+            //     }
+            //     return const Text('error');
+            //   },
+            // ),
             Container(
               decoration: kMessageContainerDecoration,
               child: Row(
@@ -60,16 +131,16 @@ class _ChatScreenState extends State<ChatScreen> {
                   Expanded(
                     child: TextField(
                       onChanged: (value) {
-                        //Do something with the user input.
+                        messageText = value;
                       },
                       decoration: kMessageTextFieldDecoration,
                     ),
                   ),
                   FlatButton(
                     onPressed: () {
-                      //Implement send functionality.
+                      onSendMessage();
                     },
-                    child: Text(
+                    child: const Text(
                       'Send',
                       style: kSendButtonTextStyle,
                     ),
@@ -83,3 +154,14 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 }
+
+
+// Future<void> getData() async {
+//     // Get docs from collection reference
+//     QuerySnapshot querySnapshot = await _collectionRef.get();
+
+//     // Get data from docs and convert map to List
+//     final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
+
+//     print(allData);
+// }
