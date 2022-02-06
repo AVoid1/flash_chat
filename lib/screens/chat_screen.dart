@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flash_chat/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ChatScreen extends StatefulWidget {
   static const String id = 'chat_screen';
@@ -65,7 +66,7 @@ class _ChatScreenState extends State<ChatScreen> {
         leading: null,
         actions: <Widget>[
           IconButton(
-              icon: Icon(Icons.close),
+              icon: const FaIcon(FontAwesomeIcons.signOutAlt),
               onPressed: () {
                 _auth.signOut();
                 Navigator.pop(context);
@@ -84,23 +85,71 @@ class _ChatScreenState extends State<ChatScreen> {
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasData) {
                   return Expanded(
-                    child: SizedBox(
-                      height: 20,
-                      child: ListView.builder(
-                        itemCount: snapshot.data!.docs.length,
-                        itemBuilder: (context, index) {
-                          return Card(
-                            child: ListTile(
-                              title: Text((snapshot.data!.docs[index].data()
-                                      as Map)['text']
-                                  .toString()),
-                              subtitle: Text((snapshot.data!.docs[index].data()
-                                      as Map)['sender']
-                                  .toString()),
-                            ),
-                          );
-                        },
-                      ),
+                    child: ListView.builder(
+                      reverse: true,
+                      itemCount: snapshot.data!.docs.length,
+                      itemBuilder: (context, index) {
+                        // final message = snapshot.data!.docs.reversed;
+                        final messageSender =
+                            (snapshot.data!.docs[index].data() as Map)['sender']
+                                .toString();
+                        final messageText =
+                            (snapshot.data!.docs[index].data() as Map)['text']
+                                .toString();
+                        final currentUser = loggedInUser!.email;
+                        // return Card(
+                        //   child: ListTile(
+                        //     title: Text((snapshot.data!.docs[index].data()
+                        //             as Map)['text']
+                        //         .toString()),
+                        //     subtitle: Text((snapshot.data!.docs[index].data()
+                        //             as Map)['sender']
+                        //         .toString()),
+                        //   ),
+                        // );
+                        return Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: currentUser == messageSender
+                                ? CrossAxisAlignment.end
+                                : CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                messageSender,
+                                style: const TextStyle(
+                                    color: Colors.black54, fontSize: 12),
+                              ),
+                              Material(
+                                borderRadius: currentUser == messageSender
+                                    ? const BorderRadius.only(
+                                        topLeft: Radius.circular(30),
+                                        bottomLeft: Radius.circular(30),
+                                        bottomRight: Radius.circular(30))
+                                    : const BorderRadius.only(
+                                        topRight: Radius.circular(30),
+                                        bottomLeft: Radius.circular(30),
+                                        bottomRight: Radius.circular(30)),
+                                elevation: 5,
+                                color: currentUser == messageSender
+                                    ? Colors.lightBlueAccent
+                                    : Colors.white,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 10),
+                                  child: Text(
+                                    messageText,
+                                    style: TextStyle(
+                                        color: currentUser == messageSender
+                                            ? Colors.white
+                                            : Colors.black54,
+                                        fontSize: 15),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   );
                 } else {
@@ -130,6 +179,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: <Widget>[
                   Expanded(
                     child: TextField(
+                      controller: messageController,
                       onChanged: (value) {
                         messageText = value;
                       },
@@ -138,6 +188,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   FlatButton(
                     onPressed: () {
+                      messageController.clear();
                       onSendMessage();
                     },
                     child: const Text(
@@ -165,3 +216,5 @@ class _ChatScreenState extends State<ChatScreen> {
 
 //     print(allData);
 // }
+
+
