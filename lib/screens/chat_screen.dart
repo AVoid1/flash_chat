@@ -12,7 +12,10 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final messageController = TextEditingController();
-  final CollectionReference _collectionRef =
+  final Query _collectionRef = FirebaseFirestore.instance
+      .collection('messages')
+      .orderBy('time', descending: true);
+  final CollectionReference _collectionReference =
       FirebaseFirestore.instance.collection('messages');
   final _auth = FirebaseAuth.instance;
   User? loggedInUser;
@@ -35,8 +38,11 @@ class _ChatScreenState extends State<ChatScreen> {
   void onSendMessage() async {
     if (messageText.isNotEmpty) {
       messageController.clear();
-      await _collectionRef
-          .add({'sender': loggedInUser!.email, 'text': messageText});
+      await _collectionReference.add({
+        'sender': loggedInUser!.email,
+        'text': messageText,
+        'time': FieldValue.serverTimestamp()
+      });
     } else {
       print('Enter Some Text');
     }
